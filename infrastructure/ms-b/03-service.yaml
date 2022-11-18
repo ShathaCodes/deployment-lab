@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-b-service
+  namespace: ms-b-ns
+  labels:
+    app: ms-b
+spec:
+  selector:
+      app: ms-b
+  ports:
+  - nodePort: 30009
+    port: 80
+    protocol: TCP
+    targetPort: 3000
+  type: NodePort
+    

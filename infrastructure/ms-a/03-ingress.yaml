@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ms-a
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: gl5.devops
+    http:
+      paths:
+      - backend:
+          service:
+            name: ms-a-service
+            port:
+              number: 9090
+        path: /
+        pathType: Prefix

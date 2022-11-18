@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-b
+  namespace: ms-b-ns
+  labels:
+    app: ms-b
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ms-b
+  template:
+    metadata:
+      labels:
+        app: ms-b
+    spec:
+      containers:
+      - name: ms-b
+        image: wassimkallel/ms-b-insat
+        ports:
+        - containerPort: 3000

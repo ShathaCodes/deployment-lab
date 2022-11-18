@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-a
+  labels:
+    app: ms-a
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ms-a
+  template:
+    metadata:
+      labels:
+        app: ms-a
+    spec:
+      containers:
+      - name: ms-a
+        image: wassimkallel/ms-a-insat
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 3000
+        ports:
+        - containerPort: 3000
+        env:
+        # Define the environment variable
+        - name: GL5 
+          valueFrom:
+            configMapKeyRef:
+              name: my-config           # The ConfigMap this value comes from.
+              key: key1 # The key to fetch.
+        volumeMounts:
+          - name: config-test
+            mountPath: "/configuration"
+            readOnly: true
+      volumes:
+      - name: config-test
+        configMap:
+          name: my-config
+          items:
+          - key: key2
+            path: test
