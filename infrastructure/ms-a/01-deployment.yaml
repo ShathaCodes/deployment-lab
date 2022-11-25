@@ -14,31 +14,49 @@ spec:
       labels:
         app: ms-a
     spec:
+      serviceAccountName: build-robot
+      initContainers:
+        - name: setup-files
+          image: alpine:latest
+          command: ["sh", "-c", "echo hello from init > /init-data/hello.txt"]
+          volumeMounts:
+            - name: init-volume
+              mountPath: "/init-data"
       containers:
-      - name: ms-a
-        image: wassimkallel/ms-a-insat
-        imagePullPolicy: Always
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 3000
-        ports:
-        - containerPort: 3000
-        env:
-        # Define the environment variable
-        - name: GL5 
-          valueFrom:
-            configMapKeyRef:
-              name: my-config           # The ConfigMap this value comes from.
-              key: key1 # The key to fetch.
-        volumeMounts:
-          - name: config-test
-            mountPath: "/configuration"
-            readOnly: true
+        - name: ms-a
+          image: wassimkallel/ms-a-insat
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+          env:
+            - name: MSB_HOST
+              value: "ms-b-service.ms-b-ns"
+            - name: MSB_PORT
+              value: "80"
+
+          ports:
+            - containerPort: 3000
+
+          volumeMounts:
+            - name: init-volume
+              readOnly: true
+              mountPath: "/init-data"
+            - name: config-test
+              mountPath: "/configuration"
+              readOnly: true
+            - name: mounted-volume
+              mountPath: "/gl5data"
       volumes:
-      - name: config-test
-        configMap:
-          name: my-config
-          items:
-          - key: key2
-            path: test
+        - name: init-volume
+          emptyDir: {}
+        - name: config-test
+          configMap:
+            name: my-config
+            items:
+              - key: key2
+                path: test
+        - name: mounted-volume
+          persistentVolumeClaim:
+            claimName: block-pvc-managed-2
